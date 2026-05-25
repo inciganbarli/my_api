@@ -69,6 +69,13 @@ app.use("/movies", movieRoutes);
 
 // home route
 app.get("/", (req, res) => {
+  // If the browser requests HTML, serve our premium developer portal dashboard!
+  if (req.accepts("html")) {
+    const path = require("path");
+    return res.sendFile(path.join(__dirname, "public", "index.html"));
+  }
+
+  // Otherwise fall back to returning standard JSON for API clients
   res.json({
     message: "Welcome to the Movie API!",
     docs: "/api-docs",
