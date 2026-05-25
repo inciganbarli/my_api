@@ -11,6 +11,7 @@ const { redisClient, connectRedis } = require("./config/redis");
 const passport = require("./config/passport");
 const swaggerSpec = require("./swagger");
 const graphqlSchema = require("./graphql/schema");
+const Movie = require("./models/Movie");
 
 // import routes
 const authRoutes = require("./routes/authRoutes");
@@ -91,6 +92,17 @@ async function startServer() {
     // sync database (creates tables if they don't exist)
     await sequelize.sync();
     console.log("Database synced!");
+
+    // Check if seeding is needed
+    const movieCount = await Movie.count();
+    if (movieCount === 0) {
+      console.log("No movies found in database. Seeding database programmatically...");
+      const movies = require("./seed/movieData");
+      await Movie.bulkCreate(movies);
+      console.log(`Successfully seeded ${movies.length} movies!`);
+    } else {
+      console.log(`Database already seeded. Found ${movieCount} movies.`);
+    }
 
     // connect to redis
     await connectRedis();
