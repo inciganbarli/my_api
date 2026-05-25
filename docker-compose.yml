@@ -13,6 +13,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # Redis cache
   redis:
@@ -42,16 +47,12 @@ services:
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-your_github_client_secret}
       GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL:-http://localhost:3000/auth/github/callback}
     depends_on:
-      - postgres
-      - redis
-    # wait a bit for postgres to be ready, then start
-    command: >
-      sh -c "
-        echo 'Waiting for PostgreSQL...' &&
-        sleep 5 &&
-        node seed/seed.js &&
-        node server.js
-      "
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    # server.js auto-seeds the database if empty — no need to run seed.js here
+    command: node server.js
 
 volumes:
   postgres_data:

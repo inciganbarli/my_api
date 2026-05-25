@@ -13,7 +13,7 @@ const {
  * @swagger
  * /movies:
  *   get:
- *     summary: Get all movies (paginated)
+ *     summary: Get all movies (paginated, optional search)
  *     tags: [Movies]
  *     parameters:
  *       - in: query
@@ -21,10 +21,32 @@ const {
  *         schema:
  *           type: integer
  *           default: 1
- *         description: Page number
+ *         description: Page number (20 movies per page)
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search movies by title (case-insensitive partial match)
+ *         example: Godfather
  *     responses:
  *       200:
- *         description: List of movies
+ *         description: Paginated list of movies
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 movies:
+ *                   type: array
+ *                 currentPage:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalMovies:
+ *                   type: integer
+ *                 search:
+ *                   type: string
+ *                   nullable: true
  */
 router.get("/", getAllMovies);
 

@@ -2,7 +2,8 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 const passport = require("../config/passport");
-const { register, login } = require("../controllers/authController");
+const { register, login, getMe } = require("../controllers/authController");
+const authenticate = require("../middleware/auth");
 require("dotenv").config();
 
 /**
@@ -128,5 +129,35 @@ router.get(
 router.get("/login-failed", (req, res) => {
   res.status(401).json({ message: "GitHub login failed. Please try again." });
 });
+
+/**
+ * @swagger
+ * /me:
+ *   get:
+ *     summary: Get the authenticated user's profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized
+ */
+router.get("/me", authenticate, getMe);
 
 module.exports = router;

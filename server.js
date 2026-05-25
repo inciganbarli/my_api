@@ -4,6 +4,8 @@ const session = require("express-session");
 const RedisStore = require("connect-redis").default;
 const swaggerUi = require("swagger-ui-express");
 const { graphqlHTTP } = require("express-graphql");
+const rateLimit = require("express-rate-limit");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const sequelize = require("./config/database");
@@ -20,6 +22,16 @@ const movieRoutes = require("./routes/movieRoutes");
 // create express app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ---- Rate Limiting ----
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests, please try again later." },
+});
+app.use(limiter);
 
 // middleware
 app.use(cors());
@@ -54,13 +66,28 @@ app.use(passport.session());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ---- GraphQL Endpoint ----
-// graphiql: true gives us a nice UI to test queries in the browser
+// Optionally decode JWT so mutations can check req.user in the context
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    if (token) {
+      try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+      } catch (_) {}
+    }
+  }
+  next();
+};
+
 app.use(
   "/graphql",
-  graphqlHTTP({
+  optionalAuth,
+  graphqlHTTP((req) => ({
     schema: graphqlSchema,
-    graphiql: true, // enables the GraphiQL interface at /graphql
-  })
+    graphiql: true,
+    context: { user: req.user || null },
+  }))
 );
 
 // routes

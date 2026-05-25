@@ -1,7 +1,8 @@
 {
+  "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "info": {
     "name": "Movie API",
-    "description": "Movie API with CRUD, JWT Auth, GitHub OAuth, Redis Cache, and GraphQL",
+    "description": "Complete Movie API — REST endpoints, GitHub OAuth, GraphQL, Redis cache, JWT auth.\n\nHow to use:\n1. Run **Register** to create an account\n2. Run **Login** — the token is saved automatically to `{{token}}`\n3. All protected routes now work with the saved token\n\n**Live URL:** https://my-api-n6ed.onrender.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -12,12 +13,7 @@
           "name": "Register",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"john_doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
@@ -26,7 +22,8 @@
               "raw": "{{base_url}}/register",
               "host": ["{{base_url}}"],
               "path": ["register"]
-            }
+            },
+            "description": "Register a new user account. Returns the created user object."
           },
           "response": []
         },
@@ -40,7 +37,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) {",
                   "    pm.environment.set('token', jsonData.token);",
-                  "    console.log('Token saved!');",
+                  "    console.log('Token saved to environment variable: token');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -49,12 +46,7 @@
           ],
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
@@ -63,12 +55,29 @@
               "raw": "{{base_url}}/login",
               "host": ["{{base_url}}"],
               "path": ["login"]
-            }
+            },
+            "description": "Login with email and password. Returns a JWT token that is automatically saved to the `token` environment variable."
           },
           "response": []
         },
         {
-          "name": "GitHub OAuth Login",
+          "name": "Get My Profile (GET /me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/me",
+              "host": ["{{base_url}}"],
+              "path": ["me"]
+            },
+            "description": "Returns the authenticated user's profile (id, username, email, createdAt). Requires a valid JWT token."
+          },
+          "response": []
+        },
+        {
+          "name": "GitHub OAuth Login (open in browser)",
           "request": {
             "method": "GET",
             "header": [],
@@ -77,17 +86,17 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "github"]
             },
-            "description": "Open this URL in your browser to login with GitHub. It will redirect you to GitHub and then back to the callback URL with a JWT token."
+            "description": "Open this URL in a browser to trigger the GitHub OAuth flow. After GitHub authorization, you will receive a JWT token."
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Movies (REST)",
+      "name": "Movies — Public (no auth)",
       "item": [
         {
-          "name": "Get All Movies (Page 1)",
+          "name": "Get All Movies — Page 1",
           "request": {
             "method": "GET",
             "header": [],
@@ -95,18 +104,14 @@
               "raw": "{{base_url}}/movies?page=1",
               "host": ["{{base_url}}"],
               "path": ["movies"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1"
-                }
-              ]
-            }
+              "query": [{ "key": "page", "value": "1" }]
+            },
+            "description": "Returns the first 20 movies. No authentication required."
           },
           "response": []
         },
         {
-          "name": "Get All Movies (Page 2)",
+          "name": "Get All Movies — Page 2",
           "request": {
             "method": "GET",
             "header": [],
@@ -114,13 +119,23 @@
               "raw": "{{base_url}}/movies?page=2",
               "host": ["{{base_url}}"],
               "path": ["movies"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "2"
-                }
-              ]
+              "query": [{ "key": "page", "value": "2" }]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Movies by Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/movies?search=Godfather",
+              "host": ["{{base_url}}"],
+              "path": ["movies"],
+              "query": [{ "key": "search", "value": "Godfather" }]
+            },
+            "description": "Search movies by title (case-insensitive, partial match). Combine with `page` for paginated results."
           },
           "response": []
         },
@@ -133,33 +148,34 @@
               "raw": "{{base_url}}/movies/1",
               "host": ["{{base_url}}"],
               "path": ["movies", "1"]
-            }
+            },
+            "description": "Returns a single movie. Response is cached in Redis for 5 minutes."
           },
           "response": []
-        },
+        }
+      ]
+    },
+    {
+      "name": "Movies — Protected (JWT required)",
+      "item": [
         {
           "name": "Create Movie",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"My New Movie\",\n  \"description\": \"A great new movie\",\n  \"release_year\": 2024,\n  \"genre\": \"Action\",\n  \"rating\": 8.5,\n  \"duration\": 120,\n  \"director\": \"John Smith\"\n}"
+              "raw": "{\n  \"title\": \"My New Movie\",\n  \"description\": \"A great new movie about adventure and discovery.\",\n  \"release_year\": 2024,\n  \"genre\": \"Action\",\n  \"rating\": 8.5,\n  \"duration\": 120,\n  \"director\": \"John Smith\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/movies",
               "host": ["{{base_url}}"],
               "path": ["movies"]
-            }
+            },
+            "description": "Create a new movie. Requires JWT token. Clears the Redis cache after creation."
           },
           "response": []
         },
@@ -168,14 +184,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "body": {
               "mode": "raw",
@@ -185,7 +195,8 @@
               "raw": "{{base_url}}/movies/1",
               "host": ["{{base_url}}"],
               "path": ["movies", "1"]
-            }
+            },
+            "description": "Update any fields of an existing movie. Partial updates supported — only include fields you want to change."
           },
           "response": []
         },
@@ -194,16 +205,14 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": {
               "raw": "{{base_url}}/movies/1",
               "host": ["{{base_url}}"],
               "path": ["movies", "1"]
-            }
+            },
+            "description": "Permanently delete a movie by ID. Clears the Redis cache after deletion."
           },
           "response": []
         }
@@ -213,15 +222,10 @@
       "name": "GraphQL",
       "item": [
         {
-          "name": "Get All Movies (GraphQL)",
+          "name": "Query — All Movies",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"query\": \"{ movies { id title genre rating director release_year } }\"\n}"
@@ -235,15 +239,10 @@
           "response": []
         },
         {
-          "name": "Get Movie by ID (GraphQL)",
+          "name": "Query — Movie by ID",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"query\": \"{ movie(id: 1) { id title description genre rating duration director release_year } }\"\n}"
@@ -257,18 +256,74 @@
           "response": []
         },
         {
-          "name": "Get Movies by Genre (GraphQL)",
+          "name": "Query — Movies by Genre",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"query\": \"{ moviesByGenre(genre: \\\"Action\\\") { id title rating director } }\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mutation — Create Movie (requires auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { createMovie(title: \\\"GraphQL Movie\\\", release_year: 2024, genre: \\\"Sci-Fi\\\", rating: 8.0, director: \\\"Jane Doe\\\") { id title genre rating director } }\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            },
+            "description": "Create a movie via GraphQL mutation. Requires JWT token in the Authorization header."
+          },
+          "response": []
+        },
+        {
+          "name": "Mutation — Update Movie (requires auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { updateMovie(id: 2, rating: 9.5, title: \\\"Updated via GraphQL\\\") { id title rating } }\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/graphql",
+              "host": ["{{base_url}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mutation — Delete Movie (requires auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { deleteMovie(id: 999) }\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/graphql",

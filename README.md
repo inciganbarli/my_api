@@ -1,39 +1,48 @@
-# 🎬 Movie API
+# Movie API
 
-A simple REST + GraphQL API for managing movies, built with Node.js, Express, PostgreSQL, Redis, JWT & GitHub OAuth authentication.
+A production-ready REST + GraphQL backend for managing movies, built with Node.js, Express, PostgreSQL, Redis, JWT & GitHub OAuth.
 
-> 🌐 **Live Demo:** https://my-api-n6ed.onrender.com
+**Live URL:** https://my-api-n6ed.onrender.com
+
+**Swagger Docs:** https://my-api-n6ed.onrender.com/api-docs
+
+**GraphQL Playground:** https://my-api-n6ed.onrender.com/graphql
+
+**Postman Collection:** https://www.postman.com/collections/movie-api-collection *(import from `postman/` folder)*
 
 ---
 
 ## Features
 
-- ✅ Full CRUD operations for movies (REST API)
-- ✅ GraphQL interface for querying movies
-- ✅ JWT authentication (register & login)
-- ✅ GitHub OAuth login
-- ✅ PostgreSQL database with Sequelize ORM
-- ✅ Redis session caching
-- ✅ Redis caching for API responses
-- ✅ Pagination (20 movies per page)
-- ✅ Swagger API documentation
-- ✅ Docker support
-- ✅ 1000+ movie records (seed data)
-- ✅ Postman collection included
+- Full CRUD on 1,050+ movies — REST and GraphQL
+- JWT authentication (register / login)
+- GitHub OAuth login via Passport.js
+- Redis response caching (list pages: 60 s TTL, single movies: 5 min TTL)
+- Pagination — max 20 movies per page
+- Title search — `GET /movies?search=godfather`
+- GraphQL queries **and** mutations with JWT auth guard
+- `GET /me` — authenticated user profile
+- Rate limiting — 200 requests / 15 minutes per IP
+- Swagger UI interactive docs
+- Docker & Docker Compose for local development
+- Deployed to Render (free tier)
 
 ---
 
 ## Tech Stack
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** PostgreSQL
-- **ORM:** Sequelize
-- **Cache & Sessions:** Redis (connect-redis)
-- **Auth:** JWT (jsonwebtoken + bcryptjs) + GitHub OAuth (Passport.js)
-- **API:** REST + GraphQL (express-graphql)
-- **Docs:** Swagger (swagger-ui-express + swagger-jsdoc)
-- **Containerization:** Docker & Docker Compose
+| Layer | Technology |
+|-------|-----------|
+| Runtime | Node.js 18 |
+| Framework | Express.js |
+| Database | PostgreSQL + Sequelize ORM |
+| Cache & Sessions | Redis (connect-redis) |
+| Auth | JWT (jsonwebtoken + bcryptjs) + GitHub OAuth (Passport.js) |
+| API | REST + GraphQL (express-graphql) |
+| Docs | Swagger (swagger-jsdoc + swagger-ui-express) |
+| Rate Limiting | express-rate-limit |
+| Containerization | Docker & Docker Compose |
+| Hosting | Render.com |
 
 ---
 
@@ -41,430 +50,310 @@ A simple REST + GraphQL API for managing movies, built with Node.js, Express, Po
 
 ```
 movie-api/
-├── server.js                # Main entry point
-├── swagger.js               # Swagger configuration
+├── server.js                 # Entry point — wires all middleware and starts server
+├── swagger.js                # Swagger / OpenAPI configuration
 ├── config/
-│   ├── database.js          # PostgreSQL connection
-│   ├── redis.js             # Redis connection
-│   └── passport.js          # GitHub OAuth strategy
+│   ├── database.js           # Sequelize PostgreSQL connection
+│   ├── redis.js              # Redis client
+│   └── passport.js           # GitHub OAuth strategy
 ├── models/
-│   ├── Movie.js             # Movie model
-│   ├── User.js              # User model
-│   └── index.js             # Export all models
+│   ├── Movie.js              # Movie model (id, title, genre, rating, …)
+│   ├── User.js               # User model (id, username, email, githubId, …)
+│   └── index.js
 ├── controllers/
-│   ├── authController.js    # Register & Login logic
-│   └── movieController.js   # Movie CRUD logic
+│   ├── authController.js     # register, login, getMe
+│   └── movieController.js    # getAllMovies (+ search), getMovieById, CRUD
 ├── routes/
-│   ├── authRoutes.js        # Auth + OAuth routes
-│   └── movieRoutes.js       # Movie routes
+│   ├── authRoutes.js         # POST /register, POST /login, GET /me, GitHub OAuth
+│   └── movieRoutes.js        # GET /movies, GET /movies/:id, POST, PUT, DELETE
 ├── middleware/
-│   └── auth.js              # JWT auth middleware
+│   └── auth.js               # JWT verification middleware
 ├── graphql/
-│   └── schema.js            # GraphQL schema & resolvers
+│   └── schema.js             # GraphQL schema — queries + mutations
 ├── seed/
-│   ├── movieData.js         # 1000+ movie records
-│   └── seed.js              # Database seed script
+│   ├── movieData.js          # 1,050+ movie records (60 hand-picked + generated)
+│   └── seed.js               # Manual seed script (drops + recreates tables)
 ├── postman/
 │   ├── Movie_API.postman_collection.json
-│   └── Movie_API.postman_environment.json
+│   ├── Movie_API.postman_environment.json         # Local environment
+│   └── Movie_API_Production.postman_environment.json  # Render environment
+├── public/
+│   └── index.html            # Developer portal landing page
 ├── package.json
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env
 ├── .env.example
 └── README.md
 ```
 
 ---
 
-## Quick Start with Docker 🐳
-
-The easiest way to run the project:
+## Quick Start — Docker
 
 ```bash
-# Clone the project
-git clone <your-repo-url>
+git clone <repo-url>
 cd movie-api
 
-# Run everything with Docker
 docker compose up --build
 ```
 
-That's it! The API will be running at `http://localhost:3000`
-
-The database will be automatically seeded with 1000+ movies on first run.
+The API starts at `http://localhost:3000`. PostgreSQL is health-checked before the app boots; the database is seeded automatically with 1,050 movies on first run.
 
 ---
 
-## Manual Installation (without Docker)
+## Manual Installation
 
-### Prerequisites
+**Requirements:** Node.js 18+, PostgreSQL, Redis
 
-- Node.js 18+
-- PostgreSQL
-- Redis
-
-### Steps
-
-1. **Clone the repo**
 ```bash
-git clone <your-repo-url>
+# 1. Clone
+git clone <repo-url>
 cd movie-api
-```
 
-2. **Install dependencies**
-```bash
+# 2. Install dependencies
 npm install
-```
 
-3. **Set up environment variables**
-```bash
+# 3. Configure environment
 cp .env.example .env
-# Edit .env with your database credentials and GitHub OAuth keys
+# Edit .env with your DB credentials and secrets
+
+# 4. Create the database in PostgreSQL
+# CREATE DATABASE moviedb;
+
+# 5. Start the server (auto-seeds if empty)
+npm run dev      # with auto-restart
+npm start        # production
 ```
 
-4. **Make sure PostgreSQL and Redis are running**
+The first startup detects an empty database and seeds it automatically.
 
-5. **Create the database**
-```sql
-CREATE DATABASE moviedb;
-```
-
-6. **Seed the database**
+To force a full reseed (destroys existing data):
 ```bash
 npm run seed
 ```
 
-7. **Start the server**
-```bash
-# Development (with auto-restart)
-npm run dev
+---
 
-# Production
-npm start
-```
+## Environment Variables
 
-The server will start at `http://localhost:3000`
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DB_HOST` | PostgreSQL host | `localhost` |
+| `DB_PORT` | PostgreSQL port | `5432` |
+| `DB_NAME` | Database name | `moviedb` |
+| `DB_USER` | Database user | `postgres` |
+| `DB_PASSWORD` | Database password | — |
+| `DATABASE_URL` | Full connection string (overrides individual DB vars) | — |
+| `JWT_SECRET` | Secret for signing JWTs | — |
+| `SESSION_SECRET` | Secret for express-session | — |
+| `REDIS_HOST` | Redis host | `localhost` |
+| `REDIS_PORT` | Redis port | `6379` |
+| `REDIS_URL` | Full Redis URL (overrides individual Redis vars) | — |
+| `PORT` | HTTP port | `3000` |
+| `GITHUB_CLIENT_ID` | GitHub OAuth App client ID | — |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret | — |
+| `GITHUB_CALLBACK_URL` | GitHub OAuth callback | `http://localhost:3000/auth/github/callback` |
 
 ---
 
-## GitHub OAuth Setup (Step-by-Step)
+## REST API Reference
 
-To use the "Login with GitHub" feature, you need to create a GitHub OAuth App:
+### Public Routes (no authentication required)
 
-### Step 1: Go to GitHub Developer Settings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/movies` | Get movies (paginated, 20/page) |
+| `GET` | `/movies?page=2` | Page 2 |
+| `GET` | `/movies?search=godfather` | Search by title (case-insensitive) |
+| `GET` | `/movies/:id` | Get movie by ID |
+| `POST` | `/register` | Create a new account |
+| `POST` | `/login` | Login → returns JWT token |
+| `GET` | `/auth/github` | Start GitHub OAuth flow |
 
-1. Go to https://github.com/settings/developers
-2. Click **"OAuth Apps"** in the left sidebar
-3. Click **"New OAuth App"**
+### Protected Routes (JWT token required)
 
-### Step 2: Fill in the form
-
-| Field | Value |
-|-------|-------|
-| Application name | `Movie API` (or any name you want) |
-| Homepage URL | `http://localhost:3000` |
-| Authorization callback URL | `http://localhost:3000/auth/github/callback` |
-
-### Step 3: Get your credentials
-
-1. After creating the app, you'll see your **Client ID**
-2. Click **"Generate a new client secret"** to get your **Client Secret**
-
-### Step 4: Add to your `.env` file
-
-```env
-GITHUB_CLIENT_ID=your_client_id_here
-GITHUB_CLIENT_SECRET=your_client_secret_here
-GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
-```
-
-### Step 5: Test it!
-
-Open your browser and go to: `http://localhost:3000/auth/github`
-
-You will be redirected to GitHub to login. After logging in, you'll get a JWT token back!
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/me` | Current user profile |
+| `POST` | `/movies` | Create a movie |
+| `PUT` | `/movies/:id` | Update a movie (partial updates supported) |
+| `DELETE` | `/movies/:id` | Delete a movie |
 
 ---
 
-## API Documentation
+## Authentication
 
-### Swagger (REST API)
-
-Once the server is running, visit:
-
-👉 **http://localhost:3000/api-docs**
-
-### GraphQL Playground
-
-Visit the interactive GraphQL playground:
-
-👉 **http://localhost:3000/graphql**
-
----
-
-## REST API Routes
-
-### Public Routes (no auth needed)
-
-| Method | Endpoint       | Description              |
-|--------|---------------|--------------------------|
-| GET    | /movies       | Get all movies (paginated)|
-| GET    | /movies/:id   | Get a movie by ID        |
-| POST   | /register     | Register a new user      |
-| POST   | /login        | Login and get JWT token  |
-| GET    | /auth/github  | Login with GitHub OAuth  |
-
-### Protected Routes (need JWT token)
-
-| Method | Endpoint       | Description              |
-|--------|---------------|--------------------------|
-| POST   | /movies       | Create a new movie       |
-| PUT    | /movies/:id   | Update a movie           |
-| DELETE | /movies/:id   | Delete a movie           |
-
-### Pagination
-
-```
-GET /movies?page=1    # First 20 movies
-GET /movies?page=2    # Movies 21-40
-GET /movies?page=3    # Movies 41-60
-```
-
----
-
-## GraphQL Queries
-
-Visit `http://localhost:3000/graphql` and try these queries:
-
-### Get all movies
-
-```graphql
-{
-  movies {
-    id
-    title
-    genre
-    rating
-    director
-    release_year
-  }
-}
-```
-
-### Get a movie by ID
-
-```graphql
-{
-  movie(id: 1) {
-    id
-    title
-    description
-    genre
-    rating
-    duration
-    director
-  }
-}
-```
-
-### Get movies by genre
-
-```graphql
-{
-  moviesByGenre(genre: "Action") {
-    id
-    title
-    rating
-    director
-  }
-}
-```
-
----
-
-## Authentication Usage
-
-### Option 1: Email & Password
-
-#### 1. Register a new user
+### Register
 
 ```bash
-curl -X POST http://localhost:3000/register \
+curl -X POST https://my-api-n6ed.onrender.com/register \
   -H "Content-Type: application/json" \
-  -d '{
-    "username": "john_doe",
-    "email": "john@example.com",
-    "password": "password123"
-  }'
+  -d '{"username": "john_doe", "email": "john@example.com", "password": "password123"}'
 ```
 
-#### 2. Login to get a token
+### Login
 
 ```bash
-curl -X POST http://localhost:3000/login \
+curl -X POST https://my-api-n6ed.onrender.com/login \
   -H "Content-Type: application/json" \
-  -d '{
-    "email": "john@example.com",
-    "password": "password123"
-  }'
+  -d '{"email": "john@example.com", "password": "password123"}'
 ```
 
 Response:
 ```json
-{
-  "message": "Login successful!",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
+{ "message": "Login successful!", "token": "eyJhbGci..." }
 ```
 
-### Option 2: GitHub OAuth
-
-1. Open `http://localhost:3000/auth/github` in your browser
-2. Login with your GitHub account
-3. You'll get a JWT token in the response
-
-### 3. Use the token for protected routes
+### Use the token
 
 ```bash
-curl -X POST http://localhost:3000/movies \
+curl -X POST https://my-api-n6ed.onrender.com/movies \
+  -H "Authorization: Bearer <your-token>" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
-  -d '{
-    "title": "My Movie",
-    "description": "A great movie",
-    "release_year": 2024,
-    "genre": "Action",
-    "rating": 8.5,
-    "duration": 120,
-    "director": "John Smith"
-  }'
+  -d '{"title": "Dune Part Three", "release_year": 2026, "genre": "Sci-Fi"}'
+```
+
+### GitHub OAuth
+
+1. Open `https://my-api-n6ed.onrender.com/auth/github` in a browser
+2. Authorise with your GitHub account
+3. Receive a JWT token in the response
+
+---
+
+## GraphQL
+
+Playground: `https://my-api-n6ed.onrender.com/graphql`
+
+### Queries (public)
+
+```graphql
+# All movies (first 100)
+{ movies { id title genre rating director release_year } }
+
+# Single movie
+{ movie(id: 1) { id title description rating duration } }
+
+# By genre
+{ moviesByGenre(genre: "Action") { id title rating } }
+```
+
+### Mutations (require JWT — pass `Authorization: Bearer <token>` header)
+
+```graphql
+# Create
+mutation {
+  createMovie(title: "New Film", release_year: 2025, genre: "Drama", rating: 8.0) {
+    id title genre
+  }
+}
+
+# Update
+mutation {
+  updateMovie(id: 5, rating: 9.2, title: "Updated Title") {
+    id title rating
+  }
+}
+
+# Delete
+mutation { deleteMovie(id: 5) }
 ```
 
 ---
 
-## Using Postman
+## Caching (Redis)
 
-1. Import the collection from `postman/Movie_API.postman_collection.json`
-2. Import the environment from `postman/Movie_API.postman_environment.json`
-3. Select the "Movie API - Local" environment
-4. Run the "Register" request first
-5. Run the "Login" request — the token is automatically saved
-6. Now you can use all the protected routes!
-7. Try the GraphQL requests in the "GraphQL" folder!
+| Endpoint | Cache Key | TTL |
+|----------|-----------|-----|
+| `GET /movies?page=N&search=X` | `movies_page_N_search_X` | 60 s |
+| `GET /movies/:id` | `movie_:id` | 300 s |
+
+Cache is invalidated automatically on any write operation (create / update / delete).
+
+---
+
+## Rate Limiting
+
+- **200 requests per 15 minutes** per IP address
+- Returns `429 Too Many Requests` when exceeded
+
+---
+
+## Postman
+
+Import both files from the `postman/` directory:
+
+1. `Movie_API.postman_collection.json` — all requests
+2. `Movie_API.postman_environment.json` — local (`http://localhost:3000`)
+3. `Movie_API_Production.postman_environment.json` — production (`https://my-api-n6ed.onrender.com`)
+
+**Workflow:**
+1. Select the desired environment
+2. Run **Register** to create an account
+3. Run **Login** — the JWT token is saved automatically to `{{token}}`
+4. All protected requests now work
+
+---
+
+## GitHub OAuth Setup
+
+1. Go to **https://github.com/settings/developers** → OAuth Apps → New OAuth App
+2. Fill in:
+   - Homepage URL: `http://localhost:3000`
+   - Callback URL: `http://localhost:3000/auth/github/callback`
+3. Copy the **Client ID** and generate a **Client Secret**
+4. Add to `.env`:
+   ```env
+   GITHUB_CLIENT_ID=your_id
+   GITHUB_CLIENT_SECRET=your_secret
+   GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+   ```
+
+---
+
+## Deployment (Render.com)
+
+### 1. Push to GitHub
+
+```bash
+git remote add origin <your-github-repo>
+git push -u origin main
+```
+
+### 2. Create PostgreSQL on Render
+
+New → PostgreSQL → Free plan → copy **Internal Database URL** → set as `DATABASE_URL` env var.
+
+### 3. Create Redis on Render
+
+New → Redis → Free plan → copy **Internal Redis URL** → set as `REDIS_URL` env var.
+
+### 4. Deploy Web Service
+
+New → Web Service → connect repo → configure:
+- **Build:** `npm install`
+- **Start:** `node server.js`
+
+Add all environment variables from the table above.
+
+### 5. Update GitHub OAuth callback
+
+In your GitHub OAuth App settings, change the callback URL to:
+```
+https://<your-service>.onrender.com/auth/github/callback
+```
 
 ---
 
 ## Docker Commands
 
 ```bash
-# Start all services
-docker compose up --build
-
-# Start in background
-docker compose up --build -d
-
-# Stop all services
-docker compose down
-
-# Stop and remove volumes (reset database)
-docker compose down -v
-
-# View logs
-docker compose logs -f app
-
-# Rebuild after code changes
-docker compose up --build
+docker compose up --build          # build and start
+docker compose up --build -d       # background
+docker compose down                # stop
+docker compose down -v             # stop + delete database volume
+docker compose logs -f app         # tail app logs
 ```
-
----
-
-## Deployment to Render.com
-
-### 1. Push your code to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git remote add origin <your-github-repo-url>
-git push -u origin main
-```
-
-### 2. Set up PostgreSQL on Render
-
-1. Go to [Render Dashboard](https://dashboard.render.com)
-2. Click **New** → **PostgreSQL**
-3. Give it a name (e.g., `movie-db`)
-4. Choose the **Free** plan
-5. Click **Create Database**
-6. Copy the **Internal Database URL** and note the host, port, username, password, and database name
-
-### 3. Set up Redis on Render
-
-1. Click **New** → **Redis**
-2. Give it a name (e.g., `movie-redis`)
-3. Choose the **Free** plan
-4. Click **Create Redis**
-5. Copy the **Internal Redis URL** and note the host and port
-
-### 4. Deploy the Web Service
-
-1. Click **New** → **Web Service**
-2. Connect your GitHub repository
-3. Configure:
-   - **Name:** movie-api
-   - **Runtime:** Node
-   - **Build Command:** `npm install`
-   - **Start Command:** `node seed/seed.js && node server.js`
-4. Add **Environment Variables:**
-   - `DB_HOST` → from your Render PostgreSQL
-   - `DB_PORT` → 5432
-   - `DB_NAME` → from your Render PostgreSQL
-   - `DB_USER` → from your Render PostgreSQL
-   - `DB_PASSWORD` → from your Render PostgreSQL
-   - `JWT_SECRET` → (create a random string)
-   - `SESSION_SECRET` → (create a random string)
-   - `REDIS_HOST` → from your Render Redis
-   - `REDIS_PORT` → 6379
-   - `PORT` → 3000
-   - `GITHUB_CLIENT_ID` → from your GitHub OAuth App
-   - `GITHUB_CLIENT_SECRET` → from your GitHub OAuth App
-   - `GITHUB_CALLBACK_URL` → `https://your-app-name.onrender.com/auth/github/callback`
-5. Click **Create Web Service**
-
-### 5. Update the GitHub OAuth callback URL
-
-Go back to your GitHub OAuth App settings and update the **Authorization callback URL** to:
-```
-https://your-app-name.onrender.com/auth/github/callback
-```
-
-### 6. Test your deployment
-
-- REST API docs: `https://your-app-name.onrender.com/api-docs`
-- GraphQL playground: `https://your-app-name.onrender.com/graphql`
-- GitHub login: `https://your-app-name.onrender.com/auth/github`
-
----
-
-## Environment Variables
-
-| Variable             | Description                         | Default           |
-|---------------------|-------------------------------------|--------------------|
-| DB_HOST             | PostgreSQL host                     | localhost          |
-| DB_PORT             | PostgreSQL port                     | 5432               |
-| DB_NAME             | Database name                       | moviedb            |
-| DB_USER             | Database username                   | postgres           |
-| DB_PASSWORD         | Database password                   | postgres123        |
-| JWT_SECRET          | Secret key for JWT tokens           | -                  |
-| SESSION_SECRET      | Secret key for sessions             | -                  |
-| REDIS_HOST          | Redis host                          | localhost          |
-| REDIS_PORT          | Redis port                          | 6379               |
-| PORT                | Server port                         | 3000               |
-| GITHUB_CLIENT_ID    | GitHub OAuth App client ID          | -                  |
-| GITHUB_CLIENT_SECRET| GitHub OAuth App client secret      | -                  |
-| GITHUB_CALLBACK_URL | GitHub OAuth callback URL           | http://localhost:3000/auth/github/callback |
 
 ---
 
