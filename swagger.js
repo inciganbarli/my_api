@@ -10,6 +10,10 @@ const options = {
     },
     servers: [
       {
+        url: "https://my-api-n6ed.onrender.com",
+        description: "Production server (Render)",
+      },
+      {
         url: "http://localhost:3000",
         description: "Local server",
       },
