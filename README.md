@@ -2,7 +2,7 @@
 
 A simple REST + GraphQL API for managing movies, built with Node.js, Express, PostgreSQL, Redis, JWT & GitHub OAuth authentication.
 
-> 🌐 **Live Demo:** https://my-api-213123.onrender.com
+> 🌐 **Live Demo:** https://my-api-n6ed.onrender.com
 
 ---
 
