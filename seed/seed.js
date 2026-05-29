@@ -8,13 +8,13 @@ async function seedDatabase() {
   try {
     console.log("Connecting to database...");
 
-    // sync database - force true will drop and recreate the table
+    
     await sequelize.sync({ force: true });
     console.log("Database synced successfully!");
 
     console.log("Inserting " + movies.length + " movies...");
 
-    // bulk insert all movies
+    
     const createdMovies = await Movie.bulkCreate(movies);
 
     console.log("Successfully inserted " + createdMovies.length + " movies!");

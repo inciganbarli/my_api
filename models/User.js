@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-// User model
+
 const User = sequelize.define("User", {
   id: {
     type: DataTypes.INTEGER,
@@ -20,11 +20,11 @@ const User = sequelize.define("User", {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: true, // allow null for OAuth users (they don't have a password)
+    allowNull: true, 
   },
   githubId: {
     type: DataTypes.STRING,
-    allowNull: true, // only filled when user signs in with GitHub
+    allowNull: true, 
     unique: true,
   },
 }, {

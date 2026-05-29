@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-// Movie model
+
 const Movie = sequelize.define("Movie", {
   id: {
     type: DataTypes.INTEGER,
@@ -30,7 +30,7 @@ const Movie = sequelize.define("Movie", {
     defaultValue: 0,
   },
   duration: {
-    type: DataTypes.INTEGER, // in minutes
+    type: DataTypes.INTEGER, 
     allowNull: true,
   },
   director: {
@@ -39,7 +39,7 @@ const Movie = sequelize.define("Movie", {
   },
 }, {
   tableName: "movies",
-  timestamps: true, // adds createdAt and updatedAt
+  timestamps: true, 
 });
 
 module.exports = Movie;

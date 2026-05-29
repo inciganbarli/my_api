@@ -2,7 +2,7 @@ const { Op } = require("sequelize");
 const Movie = require("../models/Movie");
 const { redisClient } = require("../config/redis");
 
-// Get all movies with pagination and optional search
+
 const getAllMovies = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -55,7 +55,7 @@ const getAllMovies = async (req, res) => {
   }
 };
 
-// Get a single movie by id
+
 const getMovieById = async (req, res) => {
   try {
     const cacheKey = `movie_${req.params.id}`;
@@ -88,7 +88,7 @@ const getMovieById = async (req, res) => {
   }
 };
 
-// Create a new movie
+
 const createMovie = async (req, res) => {
   try {
     const { title, description, release_year, genre, rating, duration, director } = req.body;
@@ -116,7 +116,7 @@ const createMovie = async (req, res) => {
   }
 };
 
-// Update a movie (full or partial)
+
 const updateMovie = async (req, res) => {
   try {
     const movie = await Movie.findByPk(req.params.id);
@@ -146,7 +146,7 @@ const updateMovie = async (req, res) => {
   }
 };
 
-// Delete a movie
+
 const deleteMovie = async (req, res) => {
   try {
     const movie = await Movie.findByPk(req.params.id);
@@ -165,7 +165,7 @@ const deleteMovie = async (req, res) => {
   }
 };
 
-// clear all movie page cache keys and optionally the single-movie key
+
 async function clearCache(movieId) {
   try {
     const pageKeys = await redisClient.keys("movies_page_*");

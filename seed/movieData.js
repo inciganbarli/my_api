@@ -1,5 +1,5 @@
 const movies = [
-  // ===== Hand-written realistic movies =====
+  
   { title: "The Shawshank Redemption", description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.", release_year: 1994, genre: "Drama", rating: 9.3, duration: 142, director: "Frank Darabont" },
   { title: "The Godfather", description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son.", release_year: 1972, genre: "Crime", rating: 9.2, duration: 175, director: "Francis Ford Coppola" },
   { title: "The Dark Knight", description: "When the menace known as the Joker wreaks havoc on Gotham, Batman must accept one of the greatest tests to fight injustice.", release_year: 2008, genre: "Action", rating: 9.0, duration: 152, director: "Christopher Nolan" },
@@ -66,7 +66,7 @@ const movies = [
   { title: "Spirited Away", description: "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods and witches.", release_year: 2001, genre: "Animation", rating: 8.6, duration: 125, director: "Hayao Miyazaki" },
 ];
 
-// ===== Now generate more movies to reach 1050+ =====
+
 
 var genres = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller", "Animation", "Documentary", "Fantasy", "Adventure", "Mystery", "Crime", "Musical", "Western"];
 
@@ -126,33 +126,33 @@ var descriptionTemplates = [
   "Deep in the ADJ1 wilderness, a lone NOUN1 fights for survival against all odds."
 ];
 
-// simple function to pick a random item from an array
+
 function pickRandom(arr) {
   var index = Math.floor(Math.random() * arr.length);
   return arr[index];
 }
 
-// simple function to get a random number between min and max
+
 function getRandomNumber(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// simple function to get a random rating between 1.0 and 10.0
+
 function getRandomRating() {
   var rating = (Math.random() * 9 + 1).toFixed(1);
   return parseFloat(rating);
 }
 
-// keep track of used titles so we don't get duplicates
+
 var usedTitles = {};
 for (var i = 0; i < movies.length; i++) {
   usedTitles[movies[i].title] = true;
 }
 
-// Generate movies using loops until we have 1050+
+
 var counter = 0;
 
-// Pattern 1: "The [Adjective] [Noun]"
+
 for (var a = 0; a < adjectives.length; a++) {
   for (var n = 0; n < nouns.length; n++) {
     if (movies.length >= 1050) break;
@@ -180,7 +180,7 @@ for (var a = 0; a < adjectives.length; a++) {
   if (movies.length >= 1050) break;
 }
 
-// Pattern 2: "[Prefix] [Adjective] [Noun]" for more variety
+
 for (var p = 0; p < titlePrefixes.length; p++) {
   for (var a2 = 0; a2 < adjectives.length; a2++) {
     if (movies.length >= 1050) break;
@@ -209,7 +209,7 @@ for (var p = 0; p < titlePrefixes.length; p++) {
   if (movies.length >= 1050) break;
 }
 
-// Pattern 3: "[Noun] of [Noun]" if we still need more
+
 for (var n1 = 0; n1 < nouns.length; n1++) {
   for (var n2 = 0; n2 < nouns.length; n2++) {
     if (movies.length >= 1050) break;

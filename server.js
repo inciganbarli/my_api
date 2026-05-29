@@ -15,17 +15,17 @@ const swaggerSpec = require("./swagger");
 const graphqlSchema = require("./graphql/schema");
 const Movie = require("./models/Movie");
 
-// import routes
+
 const authRoutes = require("./routes/authRoutes");
 const movieRoutes = require("./routes/movieRoutes");
 
-// create express app
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ---- Rate Limiting ----
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000, 
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -33,15 +33,15 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// middleware
+
 app.use(cors());
 app.use(express.json());
 
-// ---- Redis Session Setup ----
-// this stores user sessions in Redis instead of memory
+
+
 const redisStore = new RedisStore({
   client: redisClient,
-  prefix: "session:", // all session keys will start with "session:"
+  prefix: "session:", 
 });
 
 app.use(
@@ -51,22 +51,22 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      secure: false, // set to true if using https
+      maxAge: 24 * 60 * 60 * 1000, 
+      secure: false, 
     },
   })
 );
 
-// ---- Passport Setup ----
-// initialize passport and connect it to sessions
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
-// swagger docs
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// ---- GraphQL Endpoint ----
-// Optionally decode JWT so mutations can check req.user in the context
+
+
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader) {
@@ -90,19 +90,19 @@ app.use(
   }))
 );
 
-// routes
+
 app.use("/", authRoutes);
 app.use("/movies", movieRoutes);
 
-// home route
+
 app.get("/", (req, res) => {
-  // If the browser requests HTML, serve our premium developer portal dashboard!
+  
   if (req.accepts("html")) {
     const path = require("path");
     return res.sendFile(path.join(__dirname, "public", "index.html"));
   }
 
-  // Otherwise fall back to returning standard JSON for API clients
+  
   res.json({
     message: "Welcome to the Movie API!",
     docs: "/api-docs",
@@ -116,18 +116,18 @@ app.get("/", (req, res) => {
   });
 });
 
-// start the server
+
 async function startServer() {
   try {
-    // connect to database
+    
     await sequelize.authenticate();
     console.log("Connected to PostgreSQL!");
 
-    // sync database (creates tables if they don't exist)
+    
     await sequelize.sync();
     console.log("Database synced!");
 
-    // Check if seeding is needed
+    
     const movieCount = await Movie.count();
     if (movieCount === 0) {
       console.log("No movies found in database. Seeding database programmatically...");
@@ -138,10 +138,10 @@ async function startServer() {
       console.log(`Database already seeded. Found ${movieCount} movies.`);
     }
 
-    // connect to redis
+    
     await connectRedis();
 
-    // start listening
+    
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
       console.log(`Swagger docs at http://localhost:${PORT}/api-docs`);
