@@ -19,38 +19,46 @@ passport.deserializeUser(async (id, done) => {
 });
 
 
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: process.env.GITHUB_CALLBACK_URL,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        
-        let user = await User.findOne({
-          where: { githubId: profile.id.toString() },
-        });
+const githubClientId = process.env.GITHUB_CLIENT_ID;
+const githubClientSecret = process.env.GITHUB_CLIENT_SECRET;
 
-        if (!user) {
-          
-          user = await User.create({
-            username: profile.username || "github_user_" + profile.id,
-            email:
-              (profile.emails && profile.emails[0] && profile.emails[0].value) ||
-              profile.username + "@github.com",
-            githubId: profile.id.toString(),
-            
+if (githubClientId && githubClientSecret) {
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: githubClientId,
+        clientSecret: githubClientSecret,
+        callbackURL:
+          process.env.GITHUB_CALLBACK_URL ||
+          "http://localhost:3000/auth/github/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await User.findOne({
+            where: { githubId: profile.id.toString() },
           });
-        }
 
-        return done(null, user);
-      } catch (err) {
-        return done(err, null);
+          if (!user) {
+            user = await User.create({
+              username: profile.username || "github_user_" + profile.id,
+              email:
+                (profile.emails && profile.emails[0] && profile.emails[0].value) ||
+                profile.username + "@github.com",
+              githubId: profile.id.toString(),
+            });
+          }
+
+          return done(null, user);
+        } catch (err) {
+          return done(err, null);
+        }
       }
-    }
-  )
-);
+    )
+  );
+} else {
+  console.log(
+    "GitHub OAuth disabled: missing GITHUB_CLIENT_ID or GITHUB_CLIENT_SECRET"
+  );
+}
 
 module.exports = passport;

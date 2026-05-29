@@ -8,7 +8,13 @@
     "dev": "nodemon server.js",
     "seed": "node seed/seed.js"
   },
-  "keywords": ["movie", "api", "express", "postgresql", "graphql"],
+  "keywords": [
+    "movie",
+    "api",
+    "express",
+    "postgresql",
+    "graphql"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -22,6 +28,7 @@
     "express-session": "^1.17.3",
     "graphql": "^15.8.0",
     "jsonwebtoken": "^9.0.2",
+    "negotiator": "^0.6.3",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
     "pg": "^8.11.3",

@@ -139,7 +139,7 @@ async function startServer() {
     }
 
     
-    await connectRedis();
+    void connectRedis();
 
     
     app.listen(PORT, () => {
